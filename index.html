@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>LinkVerse — Prototype</title>
+<style>
+   
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: #071025;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  
+  .screen{
+    width:100vw; height:100vh;
+    position:absolute; top:0; left:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:20px;
+    text-align:center;
+    transform: translateY(30px);
+    opacity: 0;
+    transition: transform .45s ease, opacity .45s ease;
+    z-index: 10;
+  }
+  .screen.active{
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .screen:not(.active){ pointer-events: none; }
+
+  h1,h2{margin-bottom:8px}
+  p{opacity:.85;margin-bottom:12px}
+
+  
+  input, select, textarea{
+    width: 280px;
+    padding: 10px 12px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.03);
+    color: #fff;
+  }
+  textarea{ resize:none; }
+
+  /* Buttons */
+  .btn{
+    background: linear-gradient(90deg,#5b62ff,#8b6cff);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-top: 10px;
+  }
+  .btn.secondary{
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Cards */
+  .card{
+    width:240px;
+    padding:16px;
+    margin:10px;
+    border-radius:12px;
+    background: rgba(255,255,255,0.04);
+    cursor:pointer;
+    transition: transform .2s ease, background .2s ease;
+  }
+  .card:hover{ transform: translateY(-6px); background: rgba(255,255,255,0.07) }
+
+  
+  .row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center }
+  .small { font-size:13px; opacity:0.8; }
+
+  /* Floating background elements */
+  .bg-element{ position:absolute; z-index:0; pointer-events:none; }
+
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background: rgba(255,255,255,0.16);
+    animation: floatUp 9s linear infinite;
+    z-index:0;
+  }
+  @keyframes floatUp{ 0%{transform:translateY(0);opacity:1} 100%{transform:translateY(-420px);opacity:0} }
+
+  .floating-shape{
+    border-radius:50%;
+    background: rgba(139,108,255,0.06);
+    filter: blur(36px);
+  }
+
+  
+  @media (max-width:580px){
+    input,select,textarea{ width:86vw }
+    .card{ width:86vw }
+  }
+  
+.cursor-glow {
+  position: fixed;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,108,255,0.35), transparent 70%);
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+/* Study Materials Page Styles */
+.subject-card {
+  width: 220px;
+  padding: 16px;
+  margin: 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+  text-align: left;
+}
+
+.subject-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.07);
+}
+
+.subject-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.material-item {
+  background: rgba(255,255,255,0.03);
+  padding: 12px;
+  border-radius: 8px;
+  margin: 8px 0;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.material-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.download-btn {
+  background: rgba(139,108,255,0.2);
+  border: 1px solid rgba(139,108,255,0.3);
+  color: #8b6cff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover {
+  background: rgba(139,108,255,0.3);
+}
+
+/* Freelance Page Styles - Slightly smaller */
+.project-card {
+  width: 260px;
+  padding: 14px;
+  margin: 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  text-align: left;
+}
+
+.project-card h3 {
+  color: #8b6cff;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+.project-card p {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+/* Exchange Page Styles - Slightly smaller */
+.exchange-item {
+  background: rgba(255,255,255,0.03);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 6px 0;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.exchange-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.price-tag {
+  background: rgba(139,108,255,0.2);
+  color: #8b6cff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* Campus Network Page Styles - Slightly smaller */
+.profile-card {
+  width: 260px;
+  padding: 14px;
+  margin: 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  text-align: left;
+}
+
+.profile-card h3 {
+  color: #8b6cff;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+.connect-btn {
+  background: rgba(139,108,255,0.2);
+  border: 1px solid rgba(139,108,255,0.3);
+  color: #8b6cff;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.2s ease;
+}
+
+.connect-btn:hover {
+  background: rgba(139,108,255,0.3);
+}
+
+/* Help Centre Page Styles */
+.faq-item {
+  background: rgba(255,255,255,0.03);
+  padding: 14px;
+  border-radius: 8px;
+  margin: 6px 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.faq-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.faq-question {
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #8b6cff;
+  font-size: 14px;
+}
+
+.faq-answer {
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+/* Container styles for smaller pages */
+.compact-container {
+  max-width: 500px;
+  width: 90%;
+  margin-top: 10px;
+}
+
+.compact-section {
+  margin-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- welcome screem -->
+<div id="welcome" class="screen active" role="region" aria-label="Welcome screen">
+  <h1 style="font-size:36px">Welcome to <span style="color:#8b6cff">LinkVerse</span></h1>
+  <p style="max-width:760px">Your gateway to connect, collaborate and grow — students, faculty & alumni on one platform.</p>
+  <button id="btn-getstarted" class="btn">Get Started</button>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login" class="screen" role="region" aria-label="Login screen">
+  <h2>Login to LinkVerse</h2>
+  <p class="small">Choose account type and sign in</p>
+
+  <select id="loginUserType" aria-label="Login type">
+    <option value="student">Student Login</option>
+    <option value="faculty">Faculty Login</option>
+    <option value="alumni">Alumni Login</option>
+  </select>
+
+  <input id="loginFullname" type="text" placeholder="Full Name (optional)">
+  <input id="loginEmail" type="email" placeholder="Email">
+  <input id="loginUniversity" type="text" placeholder="University">
+  <input id="loginRoll" type="text" placeholder="Roll Number">
+
+  <button id="btn-login" class="btn">Login</button>
+
+  <p class="small" style="margin-top:12px">Don't have an account? <a href="#" id="link-to-signup" style="color:#8b6cff">Sign up</a></p>
+  <p class="small" style="margin-top:8px">Or go back to <a href="#" id="link-back-welcome" style="color:#8b6cff">Welcome</a></p>
+</div>
+
+<!--  SIGNUP SCREEN  -->
+<div id="signup" class="screen" role="region" aria-label="Signup screen">
+  <h2>Create an Account</h2>
+  <p class="small">Join LinkVerse</p>
+
+  <select id="signupType">
+    <option value="student">Student</option>
+    <option value="faculty">Faculty</option>
+    <option value="alumni">Alumni</option>
+  </select>
+  <input id="signupName" type="text" placeholder="Full Name">
+  <input id="signupEmail" type="email" placeholder="Email">
+  <input id="signupUniv" type="text" placeholder="University">
+  <input id="signupRoll" type="text" placeholder="Roll Number (optional)">
+  <input id="signupPass" type="password" placeholder="Create password">
+  <input id="signupPass2" type="password" placeholder="Confirm password">
+
+  <button id="btn-create-account" class="btn">Create Account</button>
+  <p class="small" style="margin-top:12px">Already have an account? <a href="#" id="link-to-login" style="color:#8b6cff">Login</a></p>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="dashboard" class="screen" role="region" aria-label="Dashboard">
+  <h2>Dashboard</h2>
+  <p class="small">Quick actions</p>
+
+  <div class="row" style="margin-top:14px">
+    <div class="card" id="card-create-profile">Create / Update Profile</div>
+    <div class="card" id="card-go-home">Go to Home</div>
+    <div class="card" id="card-alumni">Alumni Network</div>
+    <div class="card" id="card-groups">Study Groups</div>
+  </div>
+
+  <p class="small" style="margin-top:18px">Use cards to navigate. This is a prototype demo — real auth and persistence not included.</p>
+</div>
+
+<!--  PROFILE / PORTFOLIO SCREEN  -->
+<div id="profile" class="screen" role="region" aria-label="Profile / Portfolio">
+  <h2>Create Portfolio</h2>
+  <p class="small">Fill your details so others can discover your skills</p>
+
+  <input id="pf_name" type="text" placeholder="Full Name">
+  <input id="pf_interests" type="text" placeholder="Interests (comma separated)">
+  <input id="pf_univ" type="text" placeholder="University">
+  <input id="pf_skills" type="text" placeholder="Skills (comma separated)">
+  <textarea id="pf_about" placeholder="Short bio" style="height:90px"></textarea>
+
+  <button id="btn-save-profile" class="btn">Save & Continue</button>
+  <button class="btn secondary" id="btn-cancel-profile" style="margin-top:8px">Cancel</button>
+</div>
+
+<!-- HOME SCREEN  -->
+<div id="home" class="screen" role="region" aria-label="Home">
+  <h2>Main Home Area</h2>
+  <p class="small">Choose a section below</p>
+
+  <div class="row" style="margin-top:14px; max-width:1100px">
+    <div class="card" id="home-study">Study Materials</div>
+    <div class="card" id="home-groups">Groups & Discussions</div>
+    <div class="card" id="home-exchange">Exchange Books / Notes</div>
+    <div class="card" id="home-freelance">Freelancing Opportunities</div>
+    <div class="card" id="home-alumni">Alumni Network</div>
+    <div class="card" id="home-help">Help Centre</div>
+    <div class="card" id="home-network">Campus Network</div>
+  </div>
+
+  <button id="btn-back-dashboard" class="btn secondary" style="margin-top:18px">← Back to Dashboard</button>
+</div>
+
+<!-- STUDY MATERIALS SCREEN -->
+<div id="study-materials" class="screen" role="region" aria-label="Study Materials">
+  <h2>Study Materials</h2>
+  <p class="small">Browse notes and resources by subject</p>
+
+  <div class="row" style="margin-top:14px; max-width:1100px">
+    <div class="subject-card" data-subject="physics">
+      <div class="subject-icon">⚛️</div>
+      <h3>Physics</h3>
+      <p class="small">Mechanics, Electromagnetism, Thermodynamics</p>
+    </div>
+    <div class="subject-card" data-subject="math">
+      <div class="subject-icon">∫</div>
+      <h3>Mathematics</h3>
+      <p class="small">Calculus, Algebra, Statistics</p>
+    </div>
+    <div class="subject-card" data-subject="cs">
+      <div class="subject-icon">💻</div>
+      <h3>Computer Science</h3>
+      <p class="small">Programming, Algorithms, Databases</p>
+    </div>
+    <div class="subject-card" data-subject="webdev">
+      <div class="subject-icon">🌐</div>
+      <h3>Web Development</h3>
+      <p class="small">HTML, CSS, JavaScript, React</p>
+    </div>
+    <div class="subject-card" data-subject="chemistry">
+      <div class="subject-icon">🧪</div>
+      <h3>Chemistry</h3>
+      <p class="small">Organic, Inorganic, Physical Chemistry</p>
+    </div>
+    <div class="subject-card" data-subject="biology">
+      <div class="subject-icon">🧬</div>
+      <h3>Biology</h3>
+      <p class="small">Cell Biology, Genetics, Ecology</p>
+    </div>
+  </div>
+
+  <button id="btn-back-home-from-study" class="btn secondary" style="margin-top:18px">← Back to Home</button>
+</div>
+
+<!-- SUBJECT DETAILS SCREEN -->
+<div id="subject-details" class="screen" role="region" aria-label="Subject Details">
+  <h2 id="subject-title">Subject Materials</h2>
+  <p class="small" id="subject-description">Browse available materials for this subject</p>
+
+  <div id="materials-list" style="width: 90%; max-width: 600px; margin-top: 20px;">
+    <!-- Materials will be dynamically added here -->
+  </div>
+
+  <div style="margin-top: 20px;">
+    <button id="btn-back-to-subjects" class="btn secondary">← Back to Subjects</button>
+  </div>
+</div>
+
+<!-- FREELANCE SCREEN - Smaller and more compact -->
+<div id="freelance" class="screen" role="region" aria-label="Freelancing Opportunities">
+  <h2>Freelancing Opportunities</h2>
+  <p class="small">Showcase your projects and find freelance work</p>
+
+  <div class="compact-container">
+    <h3 style="margin-bottom: 10px; font-size: 18px;">Upload Your Project</h3>
+    <input id="project-title" type="text" placeholder="Project Title" style="width: 100%;">
+    <textarea id="project-description" placeholder="Project Description" style="width: 100%; height: 80px; margin-top: 8px;"></textarea>
+    <input id="project-skills" type="text" placeholder="Skills Used (comma separated)" style="width: 100%; margin-top: 8px;">
+    <input id="project-link" type="text" placeholder="Project Link (optional)" style="width: 100%; margin-top: 8px;">
+    <button id="btn-upload-project" class="btn" style="margin-top: 10px;">Upload Project</button>
+  </div>
+
+  <div class="compact-container compact-section">
+    <h3 style="margin-bottom: 10px; font-size: 18px;">Featured Projects</h3>
+    <div class="project-card">
+      <h3>AI Chatbot for Education</h3>
+      <p class="small">By: Priya Sharma (CSE '23)</p>
+      <p>An intelligent chatbot that helps students with academic queries and course recommendations.</p>
+      <p class="small">Skills: Python, NLP, TensorFlow</p>
+    </div>
+    <div class="project-card">
+      <h3>E-commerce Mobile App</h3>
+      <p class="small">By: Rahul Kumar (IT '22)</p>
+      <p>A full-featured e-commerce application with payment integration and user reviews.</p>
+      <p class="small">Skills: React Native, Node.js, MongoDB</p>
+    </div>
+  </div>
+
+  <button id="btn-back-home-from-freelance" class="btn secondary" style="margin-top: 15px;">← Back to Home</button>
+</div>
+
+<!-- EXCHANGE SCREEN - Smaller and more compact -->
+<div id="exchange" class="screen" role="region" aria-label="Exchange Books / Notes">
+  <h2>Exchange Books & Notes</h2>
+  <p class="small">Buy, sell or exchange study materials</p>
+
+  <div class="compact-container">
+    <h3 style="margin-bottom: 10px; font-size: 18px;">List an Item for Exchange</h3>
+    <select id="exchange-type" style="width: 100%;">
+      <option value="sell">Sell</option>
+      <option value="buy">Buy</option>
+      <option value="exchange">Exchange</option>
+    </select>
+    <input id="exchange-title" type="text" placeholder="Item Title" style="width: 100%; margin-top: 8px;">
+    <textarea id="exchange-description" placeholder="Item Description" style="width: 100%; height: 70px; margin-top: 8px;"></textarea>
+    <input id="exchange-price" type="text" placeholder="Price (if selling)" style="width: 100%; margin-top: 8px;">
+    <button id="btn-list-item" class="btn" style="margin-top: 10px;">List Item</button>
+  </div>
+
+  <div class="compact-container compact-section">
+    <h3 style="margin-bottom: 10px; font-size: 18px;">Available Items</h3>
+    <div class="exchange-item">
+      <div>
+        <strong>Calculus Textbook - 3rd Edition</strong>
+        <p class="small">By: Anjali Mehta • Condition: Like New</p>
+      </div>
+      <div class="price-tag">₹450</div>
+    </div>
+    <div class="exchange-item">
+      <div>
+        <strong>Data Structures Notes (Complete)</strong>
+        <p class="small">By: Rohit Singh • Digital Copy</p>
+      </div>
+      <div class="price-tag">₹120</div>
+    </div>
+    <div class="exchange-item">
+      <div>
+        <strong>Physics Lab Manual</strong>
+        <p class="small">By: Neha Gupta • Exchange for Chemistry Notes</p>
+      </div>
+      <div class="price-tag">Exchange</div>
+    </div>
+  </div>
+
+  <button id="btn-back-home-from-exchange" class="btn secondary" style="margin-top: 15px;">← Back to Home</button>
+</div>
+
+<!-- CAMPUS NETWORK SCREEN - Smaller and more compact -->
+<div id="campus-network" class="screen" role="region" aria-label="Campus Network">
+  <h2>Campus Network</h2>
+  <p class="small">Connect with students, faculty and alumni</p>
+
+  <div class="compact-container">
+    <input id="search-network" type="text" placeholder="Search by name, department, or skills" style="width: 100%;">
+    <button id="btn-search-network" class="btn" style="margin-top: 8px;">Search</button>
+  </div>
+
+  <div class="compact-container compact-section">
+    <h3 style="margin-bottom: 10px; font-size: 18px;">Suggested Connections</h3>
+    <div class="profile-card">
+      <h3>Dr. Anil Kumar</h3>
+      <p class="small">Faculty • Computer Science Department</p>
+      <p>Specializes in AI and Machine Learning. 10+ years of teaching experience.</p>
+      <button class="connect-btn">Connect</button>
+    </div>
+    <div class="profile-card">
+      <h3>Sanjay Patel</h3>
+      <p class="small">Alumni • Class of 2020</p>
+      <p>Software Engineer at TechCorp. Interested in mentoring students.</p>
+      <button class="connect-btn">Connect</button>
+    </div>
+    <div class="profile-card">
+      <h3>Meera Joshi</h3>
+      <p class="small">Student • 3rd Year, Mechanical Engineering</p>
+      <p>President of Robotics Club. Looking for project collaborators.</p>
+      <button class="connect-btn">Connect</button>
+    </div>
+  </div>
+
+  <button id="btn-back-home-from-network" class="btn secondary" style="margin-top: 15px;">← Back to Home</button>
+</div>
+
+<!-- HELP CENTRE SCREEN -->
+<div id="help-centre" class="screen" role="region" aria-label="Help Centre">
+  <h2>Help Centre</h2>
+  <p class="small">Frequently Asked Questions and Support</p>
+
+  <div class="compact-container">
+    <div class="faq-item">
+      <div class="faq-question">How do I reset my password?</div>
+      <div class="faq-answer">Go to the login screen and click on "Forgot Password". You'll receive an email with instructions to reset your password.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Can I change my account type after registration?</div>
+      <div class="faq-answer">Yes, you can update your account type in the profile settings. Some features may require verification for certain account types.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">How do I join a study group?</div>
+      <div class="faq-answer">Navigate to the Study Groups section, browse available groups by interest or semester, and click "Join Group" on any group you're interested in.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Is there a limit to how many materials I can upload?</div>
+      <div class="faq-answer">Currently, there's a limit of 10 active uploads per user. You can remove older uploads to make space for new ones.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">How do I contact support?</div>
+      <div class="faq-answer">You can reach our support team at support@linkverse.edu or use the chatbot in the bottom right corner of the screen.</div>
+    </div>
+  </div>
+
+  <button id="btn-back-home-from-help" class="btn secondary" style="margin-top: 15px;">← Back to Home</button>
+</div>
+
+<!--  ALUMNI NETWORK SCREEN  -->
+<div id="alumni" class="screen" role="region" aria-label="Alumni Network">
+  <h2>Alumni Network</h2>
+  <p class="small">Top recognized projects — like & comment</p>
+
+  <div style="background:rgba(255,255,255,0.06);padding:16px;border-radius:12px;width:360px;text-align:left;margin-bottom:16px;">
+    <h3 style="margin-bottom:6px">🚀 AI Based Attendance System</h3>
+    <p class="small" style="margin-bottom:8px">By: Rohan Verma (CSE '22)</p>
+    <p style="margin-bottom:8px">Uses face recognition and ML to automate attendance in classrooms.</p>
+    <p class="small">❤️ <span id="likeCount">284</span> Likes</p>
+    <button id="btn-like" class="btn" style="margin-top:10px">Like</button>
+  </div>
+
+  <h3 style="margin-bottom:8px">Comments</h3>
+  <div id="commentBox" style="width:360px;height:140px;overflow:auto;background:rgba(255,255,255,0.03);padding:10px;border-radius:8px;margin-bottom:8px;">
+    <p class="small">Radhika (Alumni 2021): Great work! This should be implemented in colleges.</p>
+    <p class="small">Kunal (Faculty): Impressive problem-solving approach!</p>
+  </div>
+
+  <input id="newComment" type="text" placeholder="Add a comment..." style="width:360px">
+  <div style="margin-top:10px;">
+    <button id="btn-add-comment" class="btn">Post Comment</button>
+    <button id="btn-back-home-from-alumni" class="btn secondary" style="margin-left:10px">Back</button>
+  </div>
+</div>
+
+<!--STUDY GROUPS SCREEN -->
+<div id="groups" class="screen" role="region" aria-label="Study Groups">
+  <h2>Study Groups</h2>
+  <p class="small">Create or join study groups</p>
+
+  <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px">
+    <select id="groupInterest" style="width:300px">
+      <option>Artificial Intelligence</option>
+      <option>Web Development</option>
+      <option>Data Science</option>
+      <option>Cyber Security</option>
+      <option>Cloud Computing</option>
+      <option>Electronics</option>
+    </select>
+
+    <select id="groupSemester" style="width:300px">
+      <option>1st Semester</option><option>2nd Semester</option><option>3rd Semester</option>
+      <option>4th Semester</option><option>5th Semester</option><option>6th Semester</option>
+      <option>7th Semester</option><option>8th Semester</option>
+    </select>
+
+    <input id="groupName" type="text" placeholder="Group name (optional)" style="width:300px">
+    <button id="btn-create-group" class="btn">Create Group</button>
+
+    <div id="createdGroups" style="margin-top:20px;width:360px;background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;display:none"></div>
+
+    <button id="btn-back-home-from-groups" class="btn secondary" style="margin-top:12px">Back</button>
+  </div>
+</div>
+
+<!--Floating background elements created by JS  -->
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function(){
+  // screen map
+  const screens = {
+    welcome: document.getElementById('welcome'),
+    login: document.getElementById('login'),
+    signup: document.getElementById('signup'),
+    dashboard: document.getElementById('dashboard'),
+    profile: document.getElementById('profile'),
+    home: document.getElementById('home'),
+    'study-materials': document.getElementById('study-materials'),
+    'subject-details': document.getElementById('subject-details'),
+    freelance: document.getElementById('freelance'),
+    exchange: document.getElementById('exchange'),
+    'campus-network': document.getElementById('campus-network'),
+    'help-centre': document.getElementById('help-centre'),
+    alumni: document.getElementById('alumni'),
+    groups: document.getElementById('groups')
+  };
+
+  function showScreen(key){
+    if(!screens[key]) { console.error('No such screen:', key); return; }
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    Object.entries(screens).forEach(([k,el])=> el.setAttribute('aria-hidden', k !== key));
+    screens[key].classList.add('active');
+    console.log('Screen shown:', key);
+  }
+
+ 
+  const btnGetStarted = document.getElementById('btn-getstarted');
+  const btnLogin = document.getElementById('btn-login');
+  const linkToSignup = document.getElementById('link-to-signup');
+  const linkToLogin = document.getElementById('link-to-login');
+  const linkBackWelcome = document.getElementById('link-back-welcome');
+
+  btnGetStarted && btnGetStarted.addEventListener('click', ()=> showScreen('login'));
+  linkBackWelcome && linkBackWelcome.addEventListener('click', (e)=> { e.preventDefault(); showScreen('welcome'); });
+
+ 
+  btnLogin && btnLogin.addEventListener('click', ()=>{
+    const email = (document.getElementById('loginEmail') || {}).value || '';
+    if(!email.trim()){
+      alert('Please enter email (demo).'); return;
+    }
+    showScreen('dashboard');
+  });
+
+ 
+  linkToSignup && linkToSignup.addEventListener('click', (e)=>{
+    e.preventDefault(); showScreen('signup');
+  });
+  linkToLogin && linkToLogin.addEventListener('click', (e)=>{
+    e.preventDefault(); showScreen('login');
+  });
+  const btnCreateAccount = document.getElementById('btn-create-account');
+  btnCreateAccount && btnCreateAccount.addEventListener('click', ()=>{
+    const email = (document.getElementById('signupEmail') || {}).value || '';
+    if(!email.trim()){ alert('Please enter an email to create account (demo).'); return; }
+    alert('Account created (demo). Redirecting to Dashboard.');
+    showScreen('dashboard');
+  });
+// dashboard cards
+  const cardProfile = document.getElementById('card-create-profile');
+  const cardGoHome = document.getElementById('card-go-home');
+  const cardAlumni = document.getElementById('card-alumni');
+  const cardGroups = document.getElementById('card-groups');
+
+  cardProfile && cardProfile.addEventListener('click', ()=> showScreen('profile'));
+  cardGoHome && cardGoHome.addEventListener('click', ()=> showScreen('home'));
+  cardAlumni && cardAlumni.addEventListener('click', ()=> showScreen('alumni'));
+  cardGroups && cardGroups.addEventListener('click', ()=> showScreen('groups'));
+
+  
+  const btnSaveProfile = document.getElementById('btn-save-profile');
+  const btnCancelProfile = document.getElementById('btn-cancel-profile');
+  btnSaveProfile && btnSaveProfile.addEventListener('click', ()=>{
+   
+    const name = (document.getElementById('pf_name') || {}).value || '';
+    if(!name.trim()){ alert('Please enter your name.'); return; }
+    alert('Profile saved (demo). Redirecting to Home.');
+    showScreen('home');
+  });
+  btnCancelProfile && btnCancelProfile.addEventListener('click', ()=> showScreen('dashboard'));
+
+ 
+  const btnBackDashboard = document.getElementById('btn-back-dashboard');
+  btnBackDashboard && btnBackDashboard.addEventListener('click', ()=> showScreen('dashboard'));
+
+  
+  const btnLike = document.getElementById('btn-like');
+  const likeCountEl = document.getElementById('likeCount');
+  const btnAddComment = document.getElementById('btn-add-comment');
+  const newCommentInput = document.getElementById('newComment');
+  const commentBox = document.getElementById('commentBox');
+  const btnBackHomeFromAlumni = document.getElementById('btn-back-home-from-alumni');
+
+  btnLike && btnLike.addEventListener('click', ()=>{
+    let c = parseInt(likeCountEl.innerText || '0', 10);
+    likeCountEl.innerText = (c + 1);
+    btnLike.innerText = 'Liked ✓';
+    btnLike.disabled = true;
+  });
+
+  btnAddComment && btnAddComment.addEventListener('click', ()=>{
+    const txt = (newCommentInput || {}).value || '';
+    if(!txt.trim()) return;
+    const p = document.createElement('p'); p.className = 'small';
+    p.innerText = 'You: ' + txt;
+    commentBox.appendChild(p);
+    newCommentInput.value = '';
+    
+    commentBox.scrollTop = commentBox.scrollHeight;
+  });
+
+  btnBackHomeFromAlumni && btnBackHomeFromAlumni.addEventListener('click', ()=> showScreen('home'));
+
+  
+  const btnCreateGroup = document.getElementById('btn-create-group');
+  const createdGroups = document.getElementById('createdGroups');
+  const btnBackHomeFromGroups = document.getElementById('btn-back-home-from-groups');
+
+  btnCreateGroup && btnCreateGroup.addEventListener('click', ()=>{
+    const interest = (document.getElementById('groupInterest') || {}).value || 'General';
+    const sem = (document.getElementById('groupSemester') || {}).value || 'Any';
+    const name = (document.getElementById('groupName') || {}).value || `${interest} Group`;
+
+    createdGroups.innerHTML = `<strong>✅ Group created</strong>
+      <p class="small">Name: ${name}</p>
+      <p class="small">Interest: ${interest}</p>
+      <p class="small">Semester: ${sem}</p>`;
+    createdGroups.style.display = 'block';
+  });
+
+  btnBackHomeFromGroups && btnBackHomeFromGroups.addEventListener('click', ()=> showScreen('home'));
+
+  
+  const homeStudy = document.getElementById('home-study');
+  const homeGroups = document.getElementById('home-groups');
+  const homeExchange = document.getElementById('home-exchange');
+  const homeFreelance = document.getElementById('home-freelance');
+  const homeAlumni = document.getElementById('home-alumni');
+  const homeHelp = document.getElementById('home-help');
+  const homeNetwork = document.getElementById('home-network');
+
+  homeStudy && homeStudy.addEventListener('click', ()=> showScreen('study-materials'));
+  homeGroups && homeGroups.addEventListener('click', ()=> showScreen('groups'));
+  homeExchange && homeExchange.addEventListener('click', ()=> showScreen('exchange'));
+  homeFreelance && homeFreelance.addEventListener('click', ()=> showScreen('freelance'));
+  homeAlumni && homeAlumni.addEventListener('click', ()=> showScreen('alumni'));
+  homeHelp && homeHelp.addEventListener('click', ()=> showScreen('help-centre'));
+  homeNetwork && homeNetwork.addEventListener('click', ()=> showScreen('campus-network'));
+
+  // Study Materials Navigation
+  const btnBackHomeFromStudy = document.getElementById('btn-back-home-from-study');
+  const btnBackToSubjects = document.getElementById('btn-back-to-subjects');
+  
+  btnBackHomeFromStudy && btnBackHomeFromStudy.addEventListener('click', ()=> showScreen('home'));
+  btnBackToSubjects && btnBackToSubjects.addEventListener('click', ()=> showScreen('study-materials'));
+
+  // Subject cards click handlers
+  const subjectCards = document.querySelectorAll('.subject-card');
+  const subjectTitle = document.getElementById('subject-title');
+  const subjectDescription = document.getElementById('subject-description');
+  const materialsList = document.getElementById('materials-list');
+
+  // Sample materials data
+  const materialsData = {
+    physics: {
+      title: 'Physics',
+      description: 'Notes and resources for Physics',
+      materials: [
+        { name: 'Classical Mechanics Notes', type: 'PDF', size: '2.4 MB', downloads: 124 },
+        { name: 'Electromagnetism Problems', type: 'PDF', size: '1.8 MB', downloads: 98 },
+        { name: 'Thermodynamics Formula Sheet', type: 'PDF', size: '0.9 MB', downloads: 156 },
+        { name: 'Quantum Physics Introduction', type: 'PDF', size: '3.2 MB', downloads: 87 },
+        { name: 'Modern Physics Lecture Slides', type: 'PPT', size: '4.1 MB', downloads: 73 }
+      ]
+    },
+    math: {
+      title: 'Mathematics',
+      description: 'Notes and resources for Mathematics',
+      materials: [
+        { name: 'Calculus I - Complete Notes', type: 'PDF', size: '3.1 MB', downloads: 210 },
+        { name: 'Linear Algebra Problems', type: 'PDF', size: '2.2 MB', downloads: 145 },
+        { name: 'Probability & Statistics Guide', type: 'PDF', size: '1.7 MB', downloads: 132 },
+        { name: 'Differential Equations Solved', type: 'PDF', size: '2.8 MB', downloads: 118 },
+        { name: 'Discrete Mathematics Exercises', type: 'PDF', size: '1.5 MB', downloads: 95 }
+      ]
+    },
+    cs: {
+      title: 'Computer Science',
+      description: 'Notes and resources for Computer Science',
+      materials: [
+        { name: 'Data Structures & Algorithms', type: 'PDF', size: '4.2 MB', downloads: 312 },
+        { name: 'Database Management Systems', type: 'PDF', size: '3.5 MB', downloads: 187 },
+        { name: 'Operating Systems Concepts', type: 'PDF', size: '2.9 MB', downloads: 154 },
+        { name: 'Computer Networks Guide', type: 'PDF', size: '3.7 MB', downloads: 142 },
+        { name: 'Object-Oriented Programming', type: 'PDF', size: '2.1 MB', downloads: 176 }
+      ]
+    },
+    webdev: {
+      title: 'Web Development',
+      description: 'Notes and resources for Web Development',
+      materials: [
+        { name: 'HTML & CSS Complete Guide', type: 'PDF', size: '2.8 MB', downloads: 289 },
+        { name: 'JavaScript Fundamentals', type: 'PDF', size: '3.3 MB', downloads: 245 },
+        { name: 'React.js Tutorial', type: 'PDF', size: '2.5 MB', downloads: 198 },
+        { name: 'Node.js Backend Development', type: 'PDF', size: '3.1 MB', downloads: 167 },
+        { name: 'Web Design Principles', type: 'PDF', size: '1.9 MB', downloads: 134 }
+      ]
+    },
+    chemistry: {
+      title: 'Chemistry',
+      description: 'Notes and resources for Chemistry',
+      materials: [
+        { name: 'Organic Chemistry Reactions', type: 'PDF', size: '2.7 MB', downloads: 167 },
+        { name: 'Inorganic Chemistry Notes', type: 'PDF', size: '2.3 MB', downloads: 123 },
+        { name: 'Physical Chemistry Formulas', type: 'PDF', size: '1.6 MB', downloads: 145 },
+        { name: 'Analytical Chemistry Methods', type: 'PDF', size: '2.1 MB', downloads: 98 },
+        { name: 'Biochemistry Basics', type: 'PDF', size: '2.9 MB', downloads: 112 }
+      ]
+    },
+    biology: {
+      title: 'Biology',
+      description: 'Notes and resources for Biology',
+      materials: [
+        { name: 'Cell Biology Notes', type: 'PDF', size: '2.4 MB', downloads: 134 },
+        { name: 'Genetics & Heredity', type: 'PDF', size: '2.8 MB', downloads: 121 },
+        { name: 'Human Anatomy Guide', type: 'PDF', size: '3.5 MB', downloads: 156 },
+        { name: 'Ecology & Environment', type: 'PDF', size: '2.2 MB', downloads: 98 },
+        { name: 'Microbiology Basics', type: 'PDF', size: '2.6 MB', downloads: 87 }
+      ]
+    }
+  };
+
+  subjectCards.forEach(card => {
+    card.addEventListener('click', () => {
+      const subject = card.getAttribute('data-subject');
+      const data = materialsData[subject];
+      
+      if (data) {
+        subjectTitle.textContent = data.title;
+        subjectDescription.textContent = data.description;
+        
+        // Clear previous materials
+        materialsList.innerHTML = '';
+        
+        // Add materials to the list
+        data.materials.forEach(material => {
+          const materialItem = document.createElement('div');
+          materialItem.className = 'material-item';
+          materialItem.innerHTML = `
+            <div>
+              <strong>${material.name}</strong>
+              <p class="small">${material.type} • ${material.size} • ${material.downloads} downloads</p>
+            </div>
+            <button class="download-btn">Download</button>
+          `;
+          materialsList.appendChild(materialItem);
+        });
+        
+        showScreen('subject-details');
+      }
+    });
+  });
+
+  // Download button functionality
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('download-btn')) {
+      const materialName = e.target.parentElement.querySelector('strong').textContent;
+      alert(`Downloading: ${materialName}\n\n(Note: This is a demo - no actual file will be downloaded)`);
+    }
+  });
+
+  // Back buttons for new screens
+  const btnBackHomeFromFreelance = document.getElementById('btn-back-home-from-freelance');
+  const btnBackHomeFromExchange = document.getElementById('btn-back-home-from-exchange');
+  const btnBackHomeFromNetwork = document.getElementById('btn-back-home-from-network');
+  const btnBackHomeFromHelp = document.getElementById('btn-back-home-from-help');
+
+  btnBackHomeFromFreelance && btnBackHomeFromFreelance.addEventListener('click', ()=> showScreen('home'));
+  btnBackHomeFromExchange && btnBackHomeFromExchange.addEventListener('click', ()=> showScreen('home'));
+  btnBackHomeFromNetwork && btnBackHomeFromNetwork.addEventListener('click', ()=> showScreen('home'));
+  btnBackHomeFromHelp && btnBackHomeFromHelp.addEventListener('click', ()=> showScreen('home'));
+
+  // Upload project functionality
+  const btnUploadProject = document.getElementById('btn-upload-project');
+  btnUploadProject && btnUploadProject.addEventListener('click', ()=>{
+    const title = document.getElementById('project-title').value;
+    if(!title.trim()) {
+      alert('Please enter a project title');
+      return;
+    }
+    alert('Project uploaded successfully! (Demo)');
+    document.getElementById('project-title').value = '';
+    document.getElementById('project-description').value = '';
+    document.getElementById('project-skills').value = '';
+    document.getElementById('project-link').value = '';
+  });
+
+  // List item functionality
+  const btnListItem = document.getElementById('btn-list-item');
+  btnListItem && btnListItem.addEventListener('click', ()=>{
+    const title = document.getElementById('exchange-title').value;
+    if(!title.trim()) {
+      alert('Please enter an item title');
+      return;
+    }
+    alert('Item listed successfully! (Demo)');
+    document.getElementById('exchange-title').value = '';
+    document.getElementById('exchange-description').value = '';
+    document.getElementById('exchange-price').value = '';
+  });
+
+  // Connect button functionality
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('connect-btn')) {
+      const profileName = e.target.parentElement.querySelector('h3').textContent;
+      alert(`Connection request sent to ${profileName}! (Demo)`);
+      e.target.textContent = 'Request Sent';
+      e.target.disabled = true;
+    }
+  });
+
+  // Search network functionality
+  const btnSearchNetwork = document.getElementById('btn-search-network');
+  btnSearchNetwork && btnSearchNetwork.addEventListener('click', ()=>{
+    const query = document.getElementById('search-network').value;
+    if(!query.trim()) {
+      alert('Please enter a search term');
+      return;
+    }
+    alert(`Searching for: ${query}\n\n(Note: This is a demo - search functionality would be implemented in a real application)`);
+  });
+
+  showScreen('welcome');
+
+  
+  (function createBackground(){
+    const body = document.body;
+    for(let i=0;i<36;i++){
+      const d = document.createElement('div');
+      d.className = 'dot bg-element';
+      d.style.left = Math.floor(Math.random()*window.innerWidth) + 'px';
+      d.style.top = Math.floor(Math.random()*window.innerHeight) + 'px';
+      d.style.opacity = (0.06 + Math.random()*0.25).toString();
+      d.style.animationDuration = (6 + Math.random()*6) + 's';
+      body.appendChild(d);
+    }
+    
+    for(let i=0;i<6;i++){
+      const s = document.createElement('div');
+      s.className = 'floating-shape bg-element';
+      const size = 140 + Math.floor(Math.random()*260);
+      s.style.width = size + 'px'; s.style.height = size + 'px';
+      s.style.left = Math.floor(Math.random()*window.innerWidth) + 'px';
+      s.style.top = Math.floor(Math.random()*window.innerHeight) + 'px';
+      s.style.opacity = 0.6;
+      body.appendChild(s);
+    }
+  })();
+
+  console.log('LinkVerse prototype initialized.');
+ 
+const glow = document.createElement('div');
+glow.className = 'cursor-glow';
+document.body.appendChild(glow);
+
+document.addEventListener('mousemove', (e)=>{
+  glow.style.left = e.clientX + 'px';
+  glow.style.top = e.clientY + 'px';
+});
+
+const chatbotBtn = document.getElementById('chatbot-btn');
+const chatbotBox = document.getElementById('chatbot-box');
+
+chatbotBtn.addEventListener('click', ()=>{
+  chatbotBox.style.display = chatbotBox.style.display === 'flex' ? 'none' : 'flex';
+});
+
+
+const chatArea = document.getElementById('chat-area');
+const chatInput = document.getElementById('chat-input');
+const chatSend = document.getElementById('chat-send');
+
+function addMessage(sender, msg){
+  const p = document.createElement('p');
+  p.innerHTML = `<strong>${sender}:</strong> ${msg}`;
+  p.style.marginBottom = "6px";
+  chatArea.appendChild(p);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+chatSend.addEventListener('click', ()=>{
+  const msg = chatInput.value.trim();
+  if(!msg) return;
+
+  addMessage("You", msg);
+  chatInput.value = "";
+
+  
+  setTimeout(()=>{
+    addMessage("AI", "This is a prototype chatbot. More advanced replies will be added soon.");
+  }, 600);
+});
+
+chatInput.addEventListener('keypress', (e)=>{
+  if(e.key === "Enter") chatSend.click();
+});
+
+}); 
+</script>
+
+<div id="chatbot-btn"
+     style="
+     position:fixed; 
+     bottom:26px; 
+     right:26px; 
+     width:60px;
+     height:60px;
+     background:#8b6cff;
+     border-radius:50%;
+     display:flex;
+     align-items:center;
+     justify-content:center;
+     cursor:pointer;
+     box-shadow:0 0 18px rgba(139,108,255,0.7);
+     z-index:999;
+     font-size:30px;">
+🤖
+</div>
+
+<div id="chatbot-box"
+     style="
+     position:fixed;
+     bottom:100px;
+     right:26px;
+     width:320px;
+     height:400px;
+     background:rgba(255,255,255,0.06);
+     backdrop-filter: blur(12px);
+     border:1px solid rgba(255,255,255,0.15);
+     border-radius:14px;
+     display:none;
+     flex-direction:column;
+     z-index:998;
+     overflow:hidden;
+     ">
+
+  <div style="padding:12px; background:rgba(0,0,0,0.3); font-weight:600; text-align:center;">
+    LinkVerse AI Chatbot
+  </div>
+
+  <div id="chat-area"
+       style="flex:1; padding:10px; overflow-y:auto; font-size:14px;">
+    <p style="opacity:0.8">👋 Hi! How can I help you today?</p>
+  </div>
+
+  <div style="padding:10px; display:flex; gap:6px;">
+    <input id="chat-input" 
+           type="text" 
+           placeholder="Type a message..."
+           style="flex:1; padding:8px; border-radius:8px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:white;">
+    <button id="chat-send"
+            style="padding:8px 12px; border-radius:8px; background:#8b6cff; border:none; cursor:pointer; color:white;">
+      Send
+    </button>
+  </div>
+</div>
+
+</body>
+</html>
